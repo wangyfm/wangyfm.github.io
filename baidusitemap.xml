@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://blog.imyang.wang/2018/04/03/aws-elasti-cache-lambda/</loc>
+    <lastmod>2019-03-14</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2019/01/22/kafka-message-re-consumed/</loc>
+    <lastmod>2019-03-14</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/03/29/aws-elasti-cache-redis/</loc>
+    <lastmod>2019-03-14</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/03/26/aws-dynamodb-2/</loc>
+    <lastmod>2019-03-14</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/03/21/aws-dynamodb-1/</loc>
+    <lastmod>2019-03-14</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/</loc>
+    <lastmod>2019-03-14</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/03/28/aws-dynamodb-4-incomplete/</loc>
+    <lastmod>2019-03-14</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/03/28/aws-dynamodb-3-dynamoose/</loc>
+    <lastmod>2019-03-14</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/10/18/kafka-cmd/</loc>
+    <lastmod>2019-03-14</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/07/04/kafka-my-problem/</loc>
+    <lastmod>2018-10-18</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2017/12/12/vuejs-i18n/</loc>
+    <lastmod>2018-10-18</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/03/08/ethfans-3-private-chain-cluster/</loc>
+    <lastmod>2018-03-16</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/03/14/ethfans-6-trasaction-gas/</loc>
+    <lastmod>2018-03-15</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/03/08/ethfans-2-setup-private-chain/</loc>
+    <lastmod>2018-03-15</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/03/08/ethfans-1-install/</loc>
+    <lastmod>2018-03-15</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/03/09/ethfans-4-dev-truffle/</loc>
+    <lastmod>2018-03-15</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/03/07/blockchain-1-introduce/</loc>
+    <lastmod>2018-03-15</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2012/12/12/wkhtmltopdf/</loc>
+    <lastmod>2018-03-06</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/02/12/activiti-task-variables/</loc>
+    <lastmod>2018-02-12</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/02/04/activiti-dynamic-assignee/</loc>
+    <lastmod>2018-02-12</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/02/03/activiti-dynamic-deploy/</loc>
+    <lastmod>2018-02-08</lastmod>
+  </url>  <url>
+    <loc>https://blog.imyang.wang/2018/02/03/activiti-setup/</loc>
+    <lastmod>2018-02-08</lastmod>
+  </url>
+</urlset>

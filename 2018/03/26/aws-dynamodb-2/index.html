@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="KVwuc0VgACwZZ4b0ur14TDVKWXZAMI_Hw-OditT2g10">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/logo.svg?v=7.0.1" color="#222">
+
+
+  <link rel="manifest" href="/manifest.json">
+
+
+  <meta name="msapplication-config" content="/browserconfig.xml">
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false,"dimmer":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+<link href="https://cdn.bootcss.com/mermaid/7.0.14/themes/mermaid.forest.min.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="https://cdn.bootcss.com/mermaid/7.0.14/mermaid.min.js"></script>
+
+<style>
+
+div.mermaid .label{
+  text-align: center;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .post-block, .post-block * {
+    visibility: visible;
+  }
+
+  .post-block {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .post-copyright, .post-copyright *  {
+    visibility: hidden;
+  }
+  .post-footer, .post-footer *  {
+    visibility: hidden;
+  }
+  .post-meta, .post-meta *  {
+    visibility: hidden;
+  }
+}
+</style>
+
+
+  <meta name="description" content="DynamoDB in ‘node.js’DynamoDB Local本地运行DynamoDB作为开发环境, 下载后本地解压运行:1java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb aws-sdk依赖于aws-sdk:1npm install --save aws-sdk  注意: Dynam">
+<meta name="keywords" content="DynamoDB,AWS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DynamoDB 开发 - JS">
+<meta property="og:url" content="https://blog.imyang.wang/2018/03/26/aws-dynamodb-2/index.html">
+<meta property="og:site_name" content="I&#39;m Yang">
+<meta property="og:description" content="DynamoDB in ‘node.js’DynamoDB Local本地运行DynamoDB作为开发环境, 下载后本地解压运行:1java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb aws-sdk依赖于aws-sdk:1npm install --save aws-sdk  注意: Dynam">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-03-14T07:42:12.011Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DynamoDB 开发 - JS">
+<meta name="twitter:description" content="DynamoDB in ‘node.js’DynamoDB Local本地运行DynamoDB作为开发环境, 下载后本地解压运行:1java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb aws-sdk依赖于aws-sdk:1npm install --save aws-sdk  注意: Dynam">
+
+
+
+
+
+
+  <link rel="canonical" href="https://blog.imyang.wang/2018/03/26/aws-dynamodb-2/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>DynamoDB 开发 - JS | I'm Yang</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">I'm Yang</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Yang's Blog</h1>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+      
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+      
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签<span class="badge">28</span></a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+      
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类<span class="badge">5</span></a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+      
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档<span class="badge">22</span></a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+      
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+  
+  
+  
+  
+
+  
+
+  <a href="https://github.com/wangyfm" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewbox="0 0 250 250" style="fill: #222; color: #fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a>
+
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.imyang.wang/2018/03/26/aws-dynamodb-2/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wang Yang">
+      <meta itemprop="description" content="java, microservice">
+      <meta itemprop="image" content="/apple-touch-icon.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="I'm Yang">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">DynamoDB 开发 - JS
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-03-26 14:42:34" itemprop="dateCreated datePublished" datetime="2018-03-26T14:42:34+08:00">2018-03-26</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-14 15:42:12" itemprop="dateModified" datetime="2019-03-14T15:42:12+08:00">2019-03-14</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2018/03/26/aws-dynamodb-2/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/03/26/aws-dynamodb-2/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="DynamoDB-in-‘node-js’"><a href="#DynamoDB-in-‘node-js’" class="headerlink" title="DynamoDB in ‘node.js’"></a>DynamoDB in ‘node.js’</h1><h2 id="DynamoDB-Local"><a href="#DynamoDB-Local" class="headerlink" title="DynamoDB Local"></a><a href="https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/DynamoDBLocal.html" target="_blank" rel="noopener">DynamoDB Local</a></h2><p>本地运行DynamoDB作为开发环境, 下载后本地解压运行:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb</span><br></pre></td></tr></table></figure></p>
+<h2 id="aws-sdk"><a href="#aws-sdk" class="headerlink" title="aws-sdk"></a>aws-sdk</h2><p>依赖于<code>aws-sdk</code>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save aws-sdk</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>注意: DynamoDB Local和 DynamoDB Web 服务是有差异的: <a href="https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html" target="_blank" rel="noopener">https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html</a></p>
+</blockquote>
+<h1 id="Dev"><a href="#Dev" class="headerlink" title="Dev"></a>Dev</h1><h2 id="查看已存在的表"><a href="#查看已存在的表" class="headerlink" title="查看已存在的表"></a>查看已存在的表</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> DynamoDb = <span class="keyword">new</span> AWS.DynamoDB();</span><br><span class="line"></span><br><span class="line">DynamoDb.listTables(<span class="function"><span class="keyword">function</span> (<span class="params">err, data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">"Unable to list tables. Error JSON:"</span>, <span class="built_in">JSON</span>.stringify(err, <span class="literal">null</span>, <span class="number">2</span>));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(data);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="创建表"><a href="#创建表" class="headerlink" title="创建表"></a><a href="https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/GettingStarted.NodeJs.01.html" target="_blank" rel="noopener">创建表</a></h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> DynamoDb = <span class="keyword">new</span> AWS.DynamoDB();</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> tableSchema = &#123;</span><br><span class="line">    TableName: <span class="string">"Movies"</span></span><br><span class="line">    KeySchema: [</span><br><span class="line">        &#123;<span class="attr">AttributeName</span>: <span class="string">"year"</span>, <span class="attr">KeyType</span>: <span class="string">"HASH"</span>&#125;,  <span class="comment">//Partition key</span></span><br><span class="line">        &#123;<span class="attr">AttributeName</span>: <span class="string">"title"</span>, <span class="attr">KeyType</span>: <span class="string">"RANGE"</span>&#125;  <span class="comment">//Sort key</span></span><br><span class="line">    ],</span><br><span class="line">    AttributeDefinitions: [</span><br><span class="line">        &#123;<span class="attr">AttributeName</span>: <span class="string">"year"</span>, <span class="attr">AttributeType</span>: <span class="string">"N"</span>&#125;,</span><br><span class="line">        &#123;<span class="attr">AttributeName</span>: <span class="string">"title"</span>, <span class="attr">AttributeType</span>: <span class="string">"S"</span>&#125;</span><br><span class="line">    ],</span><br><span class="line">    ProvisionedThroughput: &#123;</span><br><span class="line">        ReadCapacityUnits: <span class="number">10</span>,</span><br><span class="line">        WriteCapacityUnits: <span class="number">10</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">DynamoDb.createTable(tableSchema, <span class="function"><span class="keyword">function</span> (<span class="params">err, data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">"Unable to create table. Error JSON:"</span>, <span class="built_in">JSON</span>.stringify(err, <span class="literal">null</span>, <span class="number">2</span>));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(data);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意: <code>KeySchema</code> - 必须有且仅有一个分区键, 排序键可以没有, 但最多只有一个.<br>表的大小没有实际限制。表的项目数和字节数是无限制的<br>对于任何 AWS 账户，每个区域的初始限制为 256 个表</p>
+</blockquote>
+<p><em>全局表</em><br><code>全局表</code> 为部署多区域、多主机数据库提供了完全托管的解决方案，而不必构建和维护您自己的复制解决方案。在创建全局表时，指定要在其中提供表的 AWS 区域。DynamoDB 执行在这些区域中创建相同的表并将持续数据更改传播到所有这些表所必需的所有任务。</p>
+<h2 id="查看表的详情"><a href="#查看表的详情" class="headerlink" title="查看表的详情"></a>查看表的详情</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> DynamoDb = <span class="keyword">new</span> AWS.DynamoDB();</span><br><span class="line">DynamoDb.describeTable(table, <span class="function"><span class="keyword">function</span> (<span class="params">err, data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">"Unable to describe table#"</span>, table.TableName, <span class="string">". Error JSON:"</span>, <span class="built_in">JSON</span>.stringify(err, <span class="literal">null</span>, <span class="number">2</span>));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(data);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>一般输出如下:<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"Table"</span>: &#123;</span><br><span class="line">    <span class="attr">"AttributeDefinitions"</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"AttributeName"</span>: <span class="string">"year"</span>,</span><br><span class="line">        <span class="attr">"AttributeType"</span>: <span class="string">"N"</span></span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"AttributeName"</span>: <span class="string">"title"</span>,</span><br><span class="line">        <span class="attr">"AttributeType"</span>: <span class="string">"S"</span></span><br><span class="line">      &#125;</span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"TableName"</span>: <span class="string">"Movies"</span>,</span><br><span class="line">    <span class="attr">"KeySchema"</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"AttributeName"</span>: <span class="string">"year"</span>,</span><br><span class="line">        <span class="attr">"KeyType"</span>: <span class="string">"HASH"</span></span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"AttributeName"</span>: <span class="string">"title"</span>,</span><br><span class="line">        <span class="attr">"KeyType"</span>: <span class="string">"RANGE"</span></span><br><span class="line">      &#125;</span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"TableStatus"</span>: <span class="string">"ACTIVE"</span>,</span><br><span class="line">    <span class="attr">"CreationDateTime"</span>: <span class="string">"2018-03-28T02:49:45.326Z"</span>,</span><br><span class="line">    <span class="attr">"ProvisionedThroughput"</span>: &#123;</span><br><span class="line">      <span class="attr">"LastIncreaseDateTime"</span>: <span class="string">"1970-01-01T00:00:00.000Z"</span>,</span><br><span class="line">      <span class="attr">"LastDecreaseDateTime"</span>: <span class="string">"1970-01-01T00:00:00.000Z"</span>,</span><br><span class="line">      <span class="attr">"NumberOfDecreasesToday"</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">"ReadCapacityUnits"</span>: <span class="number">10</span>,</span><br><span class="line">      <span class="attr">"WriteCapacityUnits"</span>: <span class="number">10</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">"TableSizeBytes"</span>: <span class="number">28</span>,</span><br><span class="line">    <span class="attr">"ItemCount"</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"TableArn"</span>: <span class="string">"arn:aws:dynamodb:ddblocal:000000000000:table/Movies"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="添加项"><a href="#添加项" class="headerlink" title="添加项"></a>添加项</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> DynamoDBDocClient = <span class="keyword">new</span> AWS.DynamoDB.DocumentClient();</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> model = &#123;</span><br><span class="line">    TableName: <span class="string">"Movies"</span></span><br><span class="line">    Item: &#123;</span><br><span class="line">        <span class="string">"year"</span>: <span class="number">2018</span>,</span><br><span class="line">        <span class="string">"title"</span>: <span class="string">"Rush 1"</span>,</span><br><span class="line"></span><br><span class="line">        <span class="string">"info"</span>: <span class="string">"Info 1"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">DynamoDBDocClient.put(record, <span class="function"><span class="keyword">function</span> (<span class="params">err, data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">"Unable to add "</span>, record.TableName, <span class="string">". Error JSON:"</span>, <span class="built_in">JSON</span>.stringify(err, <span class="literal">null</span>, <span class="number">2</span>));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(data);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意: <code>DocumentClient.put</code>方法无返回, 除非出错了</p>
+</blockquote>
+<h2 id="查询和扫描"><a href="#查询和扫描" class="headerlink" title="查询和扫描"></a>查询和扫描</h2><p>Query 操作基于主键值查找项目.<br>Scan 操作读取表或二级索引中的每个项目 (全部的).</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> DynamoDBDocClient = <span class="keyword">new</span> AWS.DynamoDB.DocumentClient();</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> model = &#123;</span><br><span class="line">    TableName: <span class="string">"Movies"</span></span><br><span class="line">    KeyConditionExpression: <span class="string">"#yr = :yyyy"</span>,</span><br><span class="line">    ExpressionAttributeNames: &#123;</span><br><span class="line">        <span class="string">"#yr"</span>: <span class="string">"year"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    ExpressionAttributeValues: &#123;</span><br><span class="line">        <span class="string">":yyyy"</span>: <span class="number">2018</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">DynamoDBDocClient.query(params, <span class="function"><span class="keyword">function</span> (<span class="params">err, data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">"Failed to search "</span>, tableName, <span class="string">". Error JSON:"</span>, <span class="built_in">JSON</span>.stringify(err, <span class="literal">null</span>, <span class="number">2</span>));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'data: '</span>, data)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>返回如下<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    Items: [&#123;title: 'Rush 1', year: 2018, info: 'Info 1'&#125;],</span><br><span class="line">    Count: 1,</span><br><span class="line">    ScannedCount: 1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>Query</strong><br><div class="mermaid">
+  graph BT
+    subgraph AWS DynamoDB
+        D1(Apply KeyConditionExpression)
+        D2(Apply Page Size - Limit)
+        D3(Apply 1M Limitation)
+        D4(Apply FilterExpression)
+
+        D1 --> D2
+        D2 --> D3
+        D3 --> D4
+    end
+
+    A[Query/Scan] --> |request|D1
+    D4 --> |Response|B[Result <br> Pagination: LastEvaluatedKey & ExclusiveStartKey]
+    B -. Next Page .- A
+</div>
+</p>
+<h2 id="更新表"><a href="#更新表" class="headerlink" title="更新表"></a><a href="https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/WorkingWithTables.Basics.html#WorkingWithTables.Basics.UpdateTable" target="_blank" rel="noopener">更新表</a></h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> DynamoDb = <span class="keyword">new</span> AWS.DynamoDB();</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> tableSchema = &#123;</span><br><span class="line">    TableName: <span class="string">"Movies"</span></span><br><span class="line">    AttributeDefinitions: [</span><br><span class="line">        &#123;<span class="string">"AttributeName"</span>: <span class="string">"flag"</span>, <span class="string">"AttributeType"</span>: <span class="string">"N"</span>&#125;,</span><br><span class="line">        &#123;<span class="string">"AttributeName"</span>: <span class="string">"title"</span>, <span class="string">"AttributeType"</span>: <span class="string">"S"</span>&#125;</span><br><span class="line">    ],</span><br><span class="line">    GlobalSecondaryIndexUpdates: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">"Create"</span>: &#123;</span><br><span class="line">                <span class="string">"IndexName"</span>: <span class="string">"flag_title"</span>,</span><br><span class="line">                <span class="string">"KeySchema"</span>: [</span><br><span class="line">                    &#123;</span><br><span class="line">                        <span class="string">"AttributeName"</span>: <span class="string">"flag"</span>,</span><br><span class="line">                        <span class="string">"KeyType"</span>: <span class="string">"HASH"</span></span><br><span class="line">                    &#125;,</span><br><span class="line">                    &#123;</span><br><span class="line">                        <span class="string">"AttributeName"</span>: <span class="string">"title"</span>,</span><br><span class="line">                        <span class="string">"KeyType"</span>: <span class="string">"RANGE"</span></span><br><span class="line">                    &#125;</span><br><span class="line">                ],</span><br><span class="line">                <span class="string">"Projection"</span>: &#123;</span><br><span class="line">                    <span class="string">"NonKeyAttributes"</span>: [<span class="string">"info"</span>],</span><br><span class="line">                    <span class="string">"ProjectionType"</span>: <span class="string">"INCLUDE"</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="string">"ProvisionedThroughput"</span>: &#123;</span><br><span class="line">                    <span class="string">"ReadCapacityUnits"</span>: <span class="number">1</span>,</span><br><span class="line">                    <span class="string">"WriteCapacityUnits"</span>: <span class="number">1</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line">DynamoDb.updateTable(tableSchema, <span class="function"><span class="keyword">function</span> (<span class="params">err, data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">"Unable to update table. Error JSON:"</span>, <span class="built_in">JSON</span>.stringify(err, <span class="literal">null</span>, <span class="number">2</span>));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(data);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="更新项"><a href="#更新项" class="headerlink" title="更新项"></a><a href="https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/Expressions.UpdateExpressions.html" target="_blank" rel="noopener">更新项</a></h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> DynamoDBDocClient = <span class="keyword">new</span> AWS.DynamoDB.DocumentClient();</span><br><span class="line"><span class="keyword">var</span> record = &#123;</span><br><span class="line">    TableName: <span class="string">"Movies"</span></span><br><span class="line">    Key: &#123;</span><br><span class="line">        <span class="string">"year"</span>: <span class="number">2018</span>,</span><br><span class="line">        <span class="string">"title"</span>: <span class="string">'Wangy Test'</span></span><br><span class="line">    &#125;,</span><br><span class="line">    ConditionExpression: <span class="string">"#i = :iv"</span>,</span><br><span class="line">    ExpressionAttributeNames: &#123;</span><br><span class="line">        <span class="string">"#f"</span>: <span class="string">"flag"</span>,</span><br><span class="line">        <span class="string">"#s"</span>: <span class="string">"size"</span>,</span><br><span class="line">        <span class="string">"#i"</span>: <span class="string">"info"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    ExpressionAttributeValues: &#123;</span><br><span class="line">        <span class="string">":fv"</span>: <span class="number">1</span>,</span><br><span class="line">        <span class="string">":sv"</span>: <span class="number">150</span>,</span><br><span class="line">        <span class="string">":iv"</span>: <span class="string">'Wangy Test'</span></span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    UpdateExpression: <span class="string">"set #f = :fv, #s = :sv"</span>,</span><br><span class="line">    ReturnValues:<span class="string">"UPDATED_NEW"</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">DynamoDBDocClient.update(record, <span class="function"><span class="keyword">function</span> (<span class="params">err, data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">"Unable to update "</span>, record.TableName, <span class="string">". Error JSON:"</span>, <span class="built_in">JSON</span>.stringify(err, <span class="literal">null</span>, <span class="number">2</span>));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(data);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>可以操作项:</p>
+<ol>
+<li>SET - 修改或添加项目属性</li>
+<li>REMOVE - 从项目中删除属性</li>
+<li>ADD - 更新数字和集合</li>
+<li>DELETE - 从集合中删除元素</li>
+</ol>
+<p>参考:</p>
+<ol>
+<li><a href="https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/APIReference/API_UpdateItem.html#API_UpdateItem_RequestSyntax" target="_blank" rel="noopener">https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/APIReference/API_UpdateItem.html#API_UpdateItem_RequestSyntax</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/Expressions.UpdateExpressions.html" target="_blank" rel="noopener">https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/Expressions.UpdateExpressions.html</a></li>
+</ol>
+<h2 id="删除项"><a href="#删除项" class="headerlink" title="删除项"></a>删除项</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> DynamoDBDocClient = <span class="keyword">new</span> AWS.DynamoDB.DocumentClient();</span><br><span class="line"><span class="keyword">var</span> record = &#123;</span><br><span class="line">    TableName: <span class="string">"Movies"</span></span><br><span class="line">    Key: &#123;</span><br><span class="line">        <span class="string">"year"</span>: <span class="number">2018</span>,</span><br><span class="line">        <span class="string">"title"</span>: <span class="string">'Wangy Test'</span></span><br><span class="line">    &#125;,</span><br><span class="line">    ConditionExpression: <span class="string">"#yr = :yyyy"</span>,</span><br><span class="line">    ExpressionAttributeNames: &#123;</span><br><span class="line">        <span class="string">"#yr"</span>: <span class="string">"year"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    ExpressionAttributeValues: &#123;</span><br><span class="line">        <span class="string">":yyyy"</span>: <span class="number">2018</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">DynamoDBDocClient.delete(record, <span class="function"><span class="keyword">function</span> (<span class="params">err, data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">"Unable to delete "</span>, record.TableName, <span class="string">". Error JSON:"</span>, <span class="built_in">JSON</span>.stringify(err, <span class="literal">null</span>, <span class="number">2</span>));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(data);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="删除表"><a href="#删除表" class="headerlink" title="删除表"></a>删除表</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> DynamoDBDocClient = <span class="keyword">new</span> AWS.DynamoDB.DocumentClient();</span><br><span class="line"><span class="keyword">var</span> table = &#123;</span><br><span class="line">    TableName: <span class="string">"Movies"</span></span><br><span class="line">&#125;;</span><br><span class="line">DynamoDb.deleteTable(table, <span class="function"><span class="keyword">function</span> (<span class="params">err, data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">"Unable to drop table. Error JSON:"</span>, <span class="built_in">JSON</span>.stringify(err, <span class="literal">null</span>, <span class="number">2</span>));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'table desc: '</span>, data)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h1 id="延伸"><a href="#延伸" class="headerlink" title="延伸"></a>延伸</h1><h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><p>以下是 DynamoDB 数据类型描述符的完整列表：</p>
+<ol>
+<li>S – 字符串</li>
+<li>N – 数字</li>
+<li>B – 二进制</li>
+<li>BOOL – 布尔值</li>
+<li>NULL – Null</li>
+<li>M – 映射</li>
+<li>L – 列表</li>
+<li>SS – 字符串集</li>
+<li>NS – 数字集</li>
+<li>BS – 二进制集</li>
+</ol>
+<h2 id="属性分类："><a href="#属性分类：" class="headerlink" title="属性分类："></a>属性分类：</h2><ol>
+<li><p>标量类型 - 标量类型可准确地表示一个值。标量类型包括数字、字符串、二进制、布尔值和 null。</p>
+<ol>
+<li>S – 字符串</li>
+<li>N – 数字<br>数字可为正数、负数或零。数字最多可精确到 38 位。超过此位数将导致异常。<ol>
+<li>正数范围：1E-130 到 9.9999999999999999999999999999999999999E+125</li>
+<li>负数范围：-9.9999999999999999999999999999999999999E+125 到 -1E-130<br>数字以可变长度形式表示。系统会删减开头和结尾的 0.</li>
+</ol>
+</li>
+<li>B – 二进制<ol>
+<li>二进制属性的长度必须大于零且受限于最大 DynamoDB 项目大小 400 KB</li>
+<li>将主键属性定义为二进制类型属性，以下附加限制将适用：<ol>
+<li>对于简单的主键，第一个属性值 (分区键) 的最大长度为 2048 字节。</li>
+<li>对于复合主键，第二个属性值 (排序键) 的最大长度为 1024 字节。</li>
+</ol>
+</li>
+<li>在将二进制值发送到 DynamoDB 之前，您的应用程序必须采用 Base64 编码格式对其进行编码。收到这些值后，DynamoDB 会将数据解码为无符号字节数组，将其用作二进制属性的长度</li>
+</ol>
+</li>
+<li>BOOL – 布尔值</li>
+<li>NULL – Null<br>空代表属性具有未知或未定义状态。</li>
+</ol>
+</li>
+<li><p>文档类型 - 文档类型可表示具有嵌套属性的复杂结构 - 例如您将在 JSON 文档中找到的结构。文档类型包括列表和映射。<br>文档类型包括列表和映射。这些数据类型可以互相嵌套，用来表示深度最多为 32 层的复杂数据结构。<br>只要包含值的项目大小在 DynamoDB 项目大小限制 (400 KB) 内，列表或映射中值的数量就没有限制。<br>属性值不能是空字符串或空集 (字符串集、数字集或二进制集)，但可以是空列表和映射。</p>
+<ol start="6">
+<li>M – 映射<br>映射类型属性可以存储名称/值对的无序集合。映射用大括号括起：{ … }<br>映射类似于 JSON 对象。映射元素中可以存储的数据类型没有限制，映射中的元素也不一定为相同类型</li>
+<li>L – 列表<br>列表类型属性可存储值的有序集合。列表用方括号括起：[ … ]<br>列表类似于 JSON 数组。列表元素中可以存储的数据类型没有限制，列表元素中的元素也不一定为相同类型。</li>
+</ol>
+</li>
+<li>集类型 - 集类型可表示多个标量值。集类型包括字符串集、数字集和二进制集。</li>
+<li>主键属性定义为字符串类型属性，以下附加限制将适用：<ol>
+<li>对于简单的主键，第一个属性值 (分区键) 的最大长度为 2048 字节。</li>
+<li>对于复合主键，第二个属性值 (排序键) 的最大长度为 1024 字节。</li>
+</ol>
+</li>
+</ol>
+<h2 id="日期"><a href="#日期" class="headerlink" title="日期"></a>日期</h2><p>DynamoDB没有日期类型, 解决方案:</p>
+<ol>
+<li>使用字符串数据类型表示日期或时间戳。执行此操作的一种方法是使用 ISO 8601 字符串，如以下示例所示：<ol>
+<li>2016-02-15</li>
+<li>2015-12-21T17:42:34Z</li>
+<li>20150311T122706Z<br>有关更多信息，请访问 <a href="http://en.wikipedia.org/wiki/ISO_8601" target="_blank" rel="noopener">http://en.wikipedia.org/wiki/ISO_8601</a></li>
+</ol>
+</li>
+<li>使用数字数据类型表示日期或时间戳。执行此操作的一种方法是使用纪元时间 - 自 1970 年 1 月 1 日 00:00:00 UTC 以来的秒数。例如，纪元时间 1437136300 表示 2015 年 7 月 17 日 12:31:40 UTC。<br>有关更多信息，请访问 <a href="http://en.wikipedia.org/wiki/Unix_time。" target="_blank" rel="noopener">http://en.wikipedia.org/wiki/Unix_time。</a></li>
+</ol>
+<h2 id="命名个规则"><a href="#命名个规则" class="headerlink" title="命名个规则"></a>命名个规则</h2><ol>
+<li><p>DynamoDB 中的表、属性和其他对象必须具有名称.<br>所有名称都必须使用 UTF-8 进行编码，并且区分大小写。<br>表名称和索引名称的长度必须介于 3 到 255 个字符之间，而且只能包含以下字符：</p>
+<ol>
+<li>a-z</li>
+<li>A-Z</li>
+<li>0-9</li>
+<li>_ (下划线)</li>
+<li><ul>
+<li>(短划线)</li>
+</ul>
+</li>
+<li>. (圆点)</li>
+</ol>
+<p>属性名称的长度必须介于 1 到 255 个字符之间。<br>具有特殊含义：# (散列) 和 : (冒号)<br>保留关键字: <a href="https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/ReservedWords.html" target="_blank" rel="noopener">https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/ReservedWords.html</a></p>
+</li>
+</ol>
+<h2 id="读取一致性"><a href="#读取一致性" class="headerlink" title="读取一致性"></a>读取一致性</h2><ol>
+<li>Amazon DynamoDB 在全世界多个 AWS 区域可用。每个区域均与其他 AWS 区域独立和隔离</li>
+<li>每个 AWS 区域包含多个不同的称为“可用区”的位置。每个可用区都与其他可用区中的故障隔离，并提供与同一区域其他可用区的低成本、低延迟网络连接。这使您可以在某个区域的多个可用区之间快速复制数据。</li>
+<li>当您的应用程序将某个数据写入 DynamoDB 表并收到 HTTP 200 响应 (OK) 时，该数据的所有副本都会更新。该数据最终将在所有存储位置中保持一致，通常只需一秒或更短时间。</li>
+<li>最终一致性读取<br>当您从 DynamoDB 表中读取数据时，响应反映的可能不是刚刚完成的写入操作的结果。响应可能包含某些陈旧数据。如果您在短时间后重复读取请求，响应将返回最新的数据。</li>
+<li>强一致性读取<br>当您请求强一致性读取时，DynamoDB 会返回具有最新数据的响应，从而反映来自所有已成功的之前写入操作的更新。如果网络延迟或中断，可能会无法执行强一致性读取。<br>读取操作 (例如 GetItem，Query 和 Scan) 提供了一个 ConsistentRead 参数。如果您将此参数设置为 true，DynamoDB 将在操作过程中使用强一致性读取。</li>
+</ol>
+<h2 id="Count问题"><a href="#Count问题" class="headerlink" title="Count问题"></a>Count问题</h2><p><a href="https://stackoverflow.com/questions/12499822/how-can-i-get-the-total-number-of-items-in-a-dynamodb-table" target="_blank" rel="noopener">https://stackoverflow.com/questions/12499822/how-can-i-get-the-total-number-of-items-in-a-dynamodb-table</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Wang Yang</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://blog.imyang.wang/2018/03/26/aws-dynamodb-2/" title="DynamoDB 开发 - JS">https://blog.imyang.wang/2018/03/26/aws-dynamodb-2/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/DynamoDB/" rel="tag"># DynamoDB</a>
+          
+            <a href="/tags/AWS/" rel="tag"># AWS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/21/aws-dynamodb-1/" rel="next" title="AWS DynamoDB 学习">
+                <i class="fa fa-chevron-left"></i> AWS DynamoDB 学习
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/28/aws-dynamodb-3-dynamoose/" rel="prev" title="Dynamoose 使用">
+                Dynamoose 使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/apple-touch-icon.png" alt="Wang Yang">
+            
+              <p class="site-author-name" itemprop="name">Wang Yang</p>
+              <p class="site-description motion-element" itemprop="description">java, microservice</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">27</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DynamoDB-in-‘node-js’"><span class="nav-number">1.</span> <span class="nav-text">DynamoDB in ‘node.js’</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DynamoDB-Local"><span class="nav-number">1.1.</span> <span class="nav-text">DynamoDB Local</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#aws-sdk"><span class="nav-number">1.2.</span> <span class="nav-text">aws-sdk</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Dev"><span class="nav-number">2.</span> <span class="nav-text">Dev</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#查看已存在的表"><span class="nav-number">2.1.</span> <span class="nav-text">查看已存在的表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建表"><span class="nav-number">2.2.</span> <span class="nav-text">创建表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看表的详情"><span class="nav-number">2.3.</span> <span class="nav-text">查看表的详情</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#添加项"><span class="nav-number">2.4.</span> <span class="nav-text">添加项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查询和扫描"><span class="nav-number">2.5.</span> <span class="nav-text">查询和扫描</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更新表"><span class="nav-number">2.6.</span> <span class="nav-text">更新表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更新项"><span class="nav-number">2.7.</span> <span class="nav-text">更新项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除项"><span class="nav-number">2.8.</span> <span class="nav-text">删除项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除表"><span class="nav-number">2.9.</span> <span class="nav-text">删除表</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#延伸"><span class="nav-number">3.</span> <span class="nav-text">延伸</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据类型"><span class="nav-number">3.1.</span> <span class="nav-text">数据类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#属性分类："><span class="nav-number">3.2.</span> <span class="nav-text">属性分类：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#日期"><span class="nav-number">3.3.</span> <span class="nav-text">日期</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#命名个规则"><span class="nav-number">3.4.</span> <span class="nav-text">命名个规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#读取一致性"><span class="nav-number">3.5.</span> <span class="nav-text">读取一致性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Count问题"><span class="nav-number">3.6.</span> <span class="nav-text">Count问题</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2011 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wang Yang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=7.0.1"></script>
+
+
+  
+  
+
+
+  
+    <!-- LOCAL: You can save these files to your site and update links -->
+
+  
+  <script src="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/gitmint.browser.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/default.css">
+<!-- END LOCAL -->
+
+<style>
+#gitment-container a {
+  border-bottom: none;
+}
+
+</style>
+
+<script>
+  function renderGitment() {
+    var gitment = new Gitmint({
+      id: window.location.pathname,
+      owner: 'wangyfm',
+      repo: 'blog-gitment-comments',
+      
+        lang: 'zh-CN' || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+      
+      oauth: {
+      
+      
+        client_secret: 'c49270c62fdfbbb2d675670a601e5ef21b48e5a2',
+      
+        client_id: 'e53f9d3287adfa20f49e'
+      }
+    });
+    gitment.render('gitment-container');
+  }
+
+  
+    renderGitment();
+  
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=7.0.1"></script>
+  <script src="/js/src/scroll-cookie.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      
+        background-color: #eee;
+        background-image: linear-gradient(#fcfcfc, #eee);
+        border: 1px solid #d5d5d5;
+        border-radius: 3px;
+      
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      
+        right: 4px;
+        top: 8px;
+      
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1;
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function(i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap');
+      $(e).after($wrap);
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function(e) {
+        var code = $(this).parent().find('.code').find('.line').map(function(i, e) {
+          return $(e).text();
+        }).toArray().join('\n');
+        var ta = document.createElement('textarea');
+        var yPosition = window.pageYOffset || document.documentElement.scrollTop;
+        ta.style.top = yPosition + 'px'; // Prevent page scroll
+        ta.style.position = 'absolute';
+        ta.style.opacity = '0';
+        ta.readOnly = true;
+        ta.value = code;
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, code.length);
+        ta.readOnly = false;
+        var result = document.execCommand('copy');
+        
+          if (result) $(this).text('复制成功');
+          else $(this).text('复制失败');
+        
+        ta.blur(); // For iOS
+        $(this).blur();
+      })).on('mouseleave', function(e) {
+        var $b = $(this).find('.copy-btn');
+        setTimeout(function() {
+          $b.text('复制');
+        }, 300);
+      }).append(e);
+    })
+  </script>
+
+
+</body>
+</html>

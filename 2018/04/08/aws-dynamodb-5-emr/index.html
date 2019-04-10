@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="KVwuc0VgACwZZ4b0ur14TDVKWXZAMI_Hw-OditT2g10">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/logo.svg?v=7.0.1" color="#222">
+
+
+  <link rel="manifest" href="/manifest.json">
+
+
+  <meta name="msapplication-config" content="/browserconfig.xml">
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false,"dimmer":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+<link href="https://cdn.bootcss.com/mermaid/7.0.14/themes/mermaid.forest.min.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="https://cdn.bootcss.com/mermaid/7.0.14/mermaid.min.js"></script>
+
+<style>
+
+div.mermaid .label{
+  text-align: center;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .post-block, .post-block * {
+    visibility: visible;
+  }
+
+  .post-block {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .post-copyright, .post-copyright *  {
+    visibility: hidden;
+  }
+  .post-footer, .post-footer *  {
+    visibility: hidden;
+  }
+  .post-meta, .post-meta *  {
+    visibility: hidden;
+  }
+}
+</style>
+
+
+  <meta name="description" content="配置 DynamoDB权限配置  本地测试需要给当前用户的group配置DynamoDB的访问权限, Lamdba和EC2可以通过VPC来访问   配置AWS Token  12345AWS.config.update(&amp;#123;    accessKeyId: &apos;xxx&apos;,    secretAccessKey: &apos;xxx&apos;,    region: &apos;us-east-1&apos;&amp;#125;); 建模">
+<meta name="keywords" content="DynamoDB,AWS,EMR,Hive">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DynamoDB集成EMR">
+<meta property="og:url" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/index.html">
+<meta property="og:site_name" content="I&#39;m Yang">
+<meta property="og:description" content="配置 DynamoDB权限配置  本地测试需要给当前用户的group配置DynamoDB的访问权限, Lamdba和EC2可以通过VPC来访问   配置AWS Token  12345AWS.config.update(&amp;#123;    accessKeyId: &apos;xxx&apos;,    secretAccessKey: &apos;xxx&apos;,    region: &apos;us-east-1&apos;&amp;#125;); 建模">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/ddb-1.png">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/ddb-2.png">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/ddb-3.png">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/emr-1.png">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/emr-2.png">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/emr-3.png">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/emr-4.png">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/emr-5-ec2.png">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/emr-6-ec2.png">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/emr-7-ec2.png">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/emr-8-ec2-security-group.png">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/emr-9-ssh.png">
+<meta property="og:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/emr-10-hive.png">
+<meta property="og:updated_time" content="2019-03-14T07:42:12.001Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DynamoDB集成EMR">
+<meta name="twitter:description" content="配置 DynamoDB权限配置  本地测试需要给当前用户的group配置DynamoDB的访问权限, Lamdba和EC2可以通过VPC来访问   配置AWS Token  12345AWS.config.update(&amp;#123;    accessKeyId: &apos;xxx&apos;,    secretAccessKey: &apos;xxx&apos;,    region: &apos;us-east-1&apos;&amp;#125;); 建模">
+<meta name="twitter:image" content="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/ddb-1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>DynamoDB集成EMR | I'm Yang</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">I'm Yang</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Yang's Blog</h1>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+      
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+      
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签<span class="badge">28</span></a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+      
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类<span class="badge">5</span></a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+      
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档<span class="badge">22</span></a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+      
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+  
+  
+  
+  
+
+  
+
+  <a href="https://github.com/wangyfm" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewbox="0 0 250 250" style="fill: #222; color: #fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a>
+
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wang Yang">
+      <meta itemprop="description" content="java, microservice">
+      <meta itemprop="image" content="/apple-touch-icon.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="I'm Yang">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">DynamoDB集成EMR
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-04-08 12:09:43" itemprop="dateCreated datePublished" datetime="2018-04-08T12:09:43+08:00">2018-04-08</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-14 15:42:12" itemprop="dateModified" datetime="2019-03-14T15:42:12+08:00">2019-03-14</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2018/04/08/aws-dynamodb-5-emr/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/04/08/aws-dynamodb-5-emr/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="配置-DynamoDB"><a href="#配置-DynamoDB" class="headerlink" title="配置 DynamoDB"></a>配置 DynamoDB</h1><h2 id="权限配置"><a href="#权限配置" class="headerlink" title="权限配置"></a>权限配置</h2><p>  本地测试需要给当前用户的group配置DynamoDB的访问权限, <code>Lamdba</code>和<code>EC2</code>可以通过VPC来访问<br>  <img src="/2018/04/08/aws-dynamodb-5-emr/ddb-1.png" alt="ddb-1.png"></p>
+<h2 id="配置AWS-Token"><a href="#配置AWS-Token" class="headerlink" title="配置AWS Token"></a>配置AWS Token</h2>  <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">AWS.config.update(&#123;</span><br><span class="line">    accessKeyId: <span class="string">'xxx'</span>,</span><br><span class="line">    secretAccessKey: <span class="string">'xxx'</span>,</span><br><span class="line">    region: <span class="string">'us-east-1'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="建模"><a href="#建模" class="headerlink" title="建模"></a>建模</h2><p>  <code>City</code>表:<br>  <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    name: 'City',</span><br><span class="line">    schema: &#123;</span><br><span class="line">        fields: &#123;</span><br><span class="line">            id: &#123;</span><br><span class="line">                type: Number,</span><br><span class="line">                hashKey: true</span><br><span class="line">            &#125;,</span><br><span class="line">            city: &#123;</span><br><span class="line">                type: String,</span><br><span class="line">                rangeKey: true</span><br><span class="line">            &#125;,</span><br><span class="line">            zip: &#123;</span><br><span class="line">                type: String,</span><br><span class="line">                index: &#123;</span><br><span class="line">                    global: true,</span><br><span class="line">                    rangeKey: 'city',</span><br><span class="line">                    name: 'ZipNameIndex',</span><br><span class="line">                    // project: ['creationDate'], // ProjectionType: INCLUDE</span><br><span class="line">                    throughput: 5 // read and write are both 5</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        config: &#123;</span><br><span class="line">            throughput: &#123; // Sets the throughput of the DynamoDB table on creation</span><br><span class="line">                read: 5,</span><br><span class="line">                write: 5</span><br><span class="line">            &#125;,</span><br><span class="line">            useNativeBooleans: true, // Store Boolean values as Boolean (‘BOOL’) in DynamoDB</span><br><span class="line">            useDocumentTypes: true, //Store Objects and Arrays as Maps (‘M’) and Lists (‘L’) types in DynamoDB.</span><br><span class="line">            saveUnknown: true, // Specifies that attributes not defined in the schema will be saved and retrieved. This defaults to false.</span><br><span class="line">            // timestamps: &#123; // Defines that schema must contain fields to control creation and last update timestamps. If it is set to true, this fields will be createdAt for creation date and updatedAt for last update</span><br><span class="line">            //     createdAt: 'creationDate',</span><br><span class="line">            //     updatedAt: 'lastUpdateDate'</span><br><span class="line">            // &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>  <code>User</code>表:<br>  <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    name: 'User',</span><br><span class="line">    schema: &#123;</span><br><span class="line">        fields: &#123;</span><br><span class="line">            username: &#123;</span><br><span class="line">                type: String,</span><br><span class="line">                hashKey: true</span><br><span class="line">            &#125;,</span><br><span class="line">            email: &#123;</span><br><span class="line">                type: String,</span><br><span class="line">                rangeKey: true,</span><br><span class="line">            &#125;,</span><br><span class="line">            firstName: String,</span><br><span class="line">            lastName: String,</span><br><span class="line">            dateOfBirth: Date,</span><br><span class="line">            city: Number</span><br><span class="line">        &#125;,</span><br><span class="line">        config: &#123;</span><br><span class="line">            throughput: &#123; // Sets the throughput of the DynamoDB table on creation</span><br><span class="line">                read: 10,</span><br><span class="line">                write: 10</span><br><span class="line">            &#125;,</span><br><span class="line">            useNativeBooleans: true, // Store Boolean values as Boolean (‘BOOL’) in DynamoDB</span><br><span class="line">            useDocumentTypes: true, //Store Objects and Arrays as Maps (‘M’) and Lists (‘L’) types in DynamoDB.</span><br><span class="line">            saveUnknown: true, // Specifies that attributes not defined in the schema will be saved and retrieved. This defaults to false.</span><br><span class="line">            timestamps: &#123; // Defines that schema must contain fields to control creation and last update timestamps. If it is set to true, this fields will be createdAt for creation date and updatedAt for last update</span><br><span class="line">                createdAt: 'creationDate',</span><br><span class="line">                updatedAt: 'lastUpdateDate'</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="创建表病导入数据"><a href="#创建表病导入数据" class="headerlink" title="创建表病导入数据"></a>创建表病导入数据</h2><p>  通过Test Case创建表, 并将<code>mock-data.js</code>产生的测试数据导入到数据库<br>  <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">it(<span class="string">'City record should be batch added successfully'</span>, () =&gt; &#123;</span><br><span class="line">    <span class="keyword">var</span> allCities = <span class="built_in">JSON</span>.parse(fs.readFileSync(normalPath + <span class="string">'/mock-data-cities.json'</span>, <span class="string">'utf8'</span>)).data;</span><br><span class="line">    expect(allCities.length).to.be.equal(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> items = [];</span><br><span class="line">    allCities.forEach(<span class="function"><span class="params">p</span> =&gt;</span> &#123;</span><br><span class="line">        items.push(<span class="keyword">new</span> City(p));</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> City.batchPut(items).then(<span class="function"><span class="params">data</span> =&gt;</span> &#123;</span><br><span class="line">        expect(<span class="built_in">Object</span>.keys(data.Responses)).to.have.lengthOf(<span class="number">0</span>);</span><br><span class="line">        expect(<span class="built_in">Object</span>.keys(data.UnprocessedItems)).to.have.lengthOf(<span class="number">0</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">it(<span class="string">'User record should be batch added successfully'</span>, () =&gt; &#123;</span><br><span class="line">    <span class="keyword">var</span> allUsers = <span class="built_in">JSON</span>.parse(fs.readFileSync(normalPath + <span class="string">'/mock-data-users.json'</span>, <span class="string">'utf8'</span>)).data;</span><br><span class="line">    expect(allUsers.length).to.be.equal(<span class="number">200</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> items = [];</span><br><span class="line">    allUsers.forEach(<span class="function"><span class="params">p</span> =&gt;</span> &#123;</span><br><span class="line">        items.push(<span class="keyword">new</span> User(p));</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> User.batchPut(items).then(<span class="function"><span class="params">data</span> =&gt;</span> &#123;</span><br><span class="line">        expect(<span class="built_in">Object</span>.keys(data.Responses)).to.have.lengthOf(<span class="number">0</span>);</span><br><span class="line">        expect(<span class="built_in">Object</span>.keys(data.UnprocessedItems)).to.have.lengthOf(<span class="number">0</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h2 id="在-DynamoDB-Console-检查数据"><a href="#在-DynamoDB-Console-检查数据" class="headerlink" title="在 DynamoDB Console 检查数据"></a>在 <a href="https://console.aws.amazon.com/dynamodb/home" target="_blank" rel="noopener">DynamoDB Console</a> 检查数据</h2><p>  <img src="/2018/04/08/aws-dynamodb-5-emr/ddb-2.png" alt="ddb-2.png"><br>  <img src="/2018/04/08/aws-dynamodb-5-emr/ddb-3.png" alt="ddb-3.png"></p>
+<h1 id="Amazon-EMR"><a href="#Amazon-EMR" class="headerlink" title="Amazon EMR"></a>Amazon EMR</h1><p><code>Hadoop</code>: 分布式文件系统 + MapReduce<br><code>Hive</code>: 构建在<code>Hadoop</code>之上的数据仓库工具, 提供了简单的结构化查询语言, 可以将sql语句转换为MapReduce任务进行运行.</p>
+<h2 id="启动Hive集群"><a href="#启动Hive集群" class="headerlink" title="启动Hive集群"></a>启动Hive集群</h2><h3 id="准备密钥对-可选"><a href="#准备密钥对-可选" class="headerlink" title="准备密钥对 (可选)"></a>准备密钥对 (可选)</h3><p>  进入 <a href="https://console.aws.amazon.com/ec2/v2/home" target="_blank" rel="noopener">EC2 Console</a>, 配置密钥对</p>
+<h3 id="进入-Amazon-EMR-Console-创建Hadoop集群"><a href="#进入-Amazon-EMR-Console-创建Hadoop集群" class="headerlink" title="进入 Amazon EMR Console, 创建Hadoop集群"></a>进入 <a href="https://console.aws.amazon.com/elasticmapreduce/home" target="_blank" rel="noopener">Amazon EMR Console</a>, 创建Hadoop集群</h3><p>  <img src="/2018/04/08/aws-dynamodb-5-emr/emr-1.png" alt="emr-1.png"></p>
+<h3 id="配置并启动Hadoop集群"><a href="#配置并启动Hadoop集群" class="headerlink" title="配置并启动Hadoop集群"></a>配置并启动Hadoop集群</h3><p>  注意配置<strong>密钥对</strong>, 后续测试相关:<br>  <img src="/2018/04/08/aws-dynamodb-5-emr/emr-2.png" alt="emr-2.png"><br>  <img src="/2018/04/08/aws-dynamodb-5-emr/emr-3.png" alt="emr-3.png"></p>
+<h3 id="查看Hadoop集群详情"><a href="#查看Hadoop集群详情" class="headerlink" title="查看Hadoop集群详情"></a>查看Hadoop集群详情</h3><ol>
+<li>集群详情<br><img src="/2018/04/08/aws-dynamodb-5-emr/emr-4.png" alt="emr-4.png"></li>
+<li>EC2 集群详情<br><img src="/2018/04/08/aws-dynamodb-5-emr/emr-5-ec2.png" alt="emr-5-ec2.png"><br><img src="/2018/04/08/aws-dynamodb-5-emr/emr-6-ec2.png" alt="emr-6-ec2.png"><br><img src="/2018/04/08/aws-dynamodb-5-emr/emr-7-ec2.png" alt="emr-7-ec2.png"></li>
+</ol>
+<h3 id="访问集成集群-可选"><a href="#访问集成集群-可选" class="headerlink" title="访问集成集群 (可选)"></a>访问集成集群 (可选)</h3><p>  Hadoop集群已经启动, 我们可以通过SSH访问Hadoop</p>
+<ol>
+<li>配置EC2的Security Group, 保证一些服务的端口可用, 比如ssh对应的20端口<br><img src="/2018/04/08/aws-dynamodb-5-emr/emr-8-ec2-security-group.png" alt="emr-8-ec2-security-group.png"></li>
+<li><p>通过SSH命令访问</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -i KAT-ElastiCacheEC2.pem hadoop@ec2-35-172-190-32.compute-1.amazonaws.com</span><br></pre></td></tr></table></figure>
+<p><img src="/2018/04/08/aws-dynamodb-5-emr/emr-9-ssh.png" alt="emr-9-ssh.png"></p>
+</li>
+<li>测试<code>Hive</code>命令:<br><img src="/2018/04/08/aws-dynamodb-5-emr/emr-10-hive.png" alt="emr-10-hive.png"></li>
+</ol>
+<h1 id="DynamoDB集成Hive"><a href="#DynamoDB集成Hive" class="headerlink" title="DynamoDB集成Hive"></a><a href="https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/EMRforDynamoDB.Tutorial.html" target="_blank" rel="noopener">DynamoDB集成Hive</a></h1><p>使用 <em>HiveQL</em> 访问外部数据源(DynamoDB中存储的数据), 帮助我们处理并分析数据源</p>
+<h2 id="本地开发环境搭建"><a href="#本地开发环境搭建" class="headerlink" title="本地开发环境搭建"></a>本地开发环境搭建</h2><h3 id="配置SSH-隧道"><a href="#配置SSH-隧道" class="headerlink" title="配置SSH 隧道"></a>配置SSH 隧道</h3><p>  因为EC2没有配置Public IP, 所以我们通过SSH 隧道以方便在本地访问Hadoop集群:<br>  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -o ServerAliveInterval=10 -i path-to-key-file -N -L 10000:localhost:10000 hadoop@master-public-dns-name</span><br></pre></td></tr></table></figure></p>
+<p>  ==&gt;<br>  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -o ServerAliveInterval=10 -i KAT-ElastiCacheEC2.pem -N -L 10000:localhost:10000 hadoop@ec2-35-172-190-32.compute-1.amazonaws.com</span><br></pre></td></tr></table></figure></p>
+<p>  通过SSH 隧道将Hadoop集群master节点的10000端口映射到本地的10000端口上.</p>
+<h3 id="测试SSH-隧道"><a href="#测试SSH-隧道" class="headerlink" title="测试SSH 隧道"></a>测试SSH 隧道</h3><p>  使用JDBC访问Hive.</p>
+<ol>
+<li>可以通<strong>SQL Workbench/J</strong>来测试, 参考: <a href="https://docs.aws.amazon.com/zh_cn/emr/latest/ReleaseGuide/HiveJDBCDriver.html" target="_blank" rel="noopener">使用 Hive JDBC 驱动程序</a></li>
+<li>Java程序</li>
+</ol>
+<h2 id="Java程序通过JDBC连接Hive"><a href="#Java程序通过JDBC连接Hive" class="headerlink" title="Java程序通过JDBC连接Hive"></a>Java程序通过JDBC连接Hive</h2><h3 id="下载Amazon-Hive-Jdbc-Driver"><a href="#下载Amazon-Hive-Jdbc-Driver" class="headerlink" title="下载Amazon Hive Jdbc Driver"></a>下载Amazon Hive Jdbc Driver</h3><p>  下载: <a href="https://docs.aws.amazon.com/zh_cn/emr/latest/ReleaseGuide/HiveJDBCDriver.html" target="_blank" rel="noopener">https://docs.aws.amazon.com/zh_cn/emr/latest/ReleaseGuide/HiveJDBCDriver.html</a></p>
+<h3 id="加载Amazon-Hive-Jdbc-Driver"><a href="#加载Amazon-Hive-Jdbc-Driver" class="headerlink" title="加载Amazon Hive Jdbc Driver"></a>加载Amazon Hive Jdbc Driver</h3><ol>
+<li><p><code>pom</code>文件:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--START local amazon hive jdbc driver dependencies. They are not in maven central/finra CM repo.--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.amazon.hive<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hive_service<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>system<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">systemPath</span>&gt;</span>$&#123;project.basedir&#125;/src/main/resources/libs/hive_service.jar<span class="tag">&lt;/<span class="name">systemPath</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.amazon.hive<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>HiveJDBC41<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>system<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">systemPath</span>&gt;</span>$&#123;project.basedir&#125;/src/main/resources/libs/HiveJDBC41.jar<span class="tag">&lt;/<span class="name">systemPath</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.amazon.hive<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>libfb303<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>system<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">systemPath</span>&gt;</span>$&#123;project.basedir&#125;/src/main/resources/libs/libfb303-0.9.0.jar<span class="tag">&lt;/<span class="name">systemPath</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.amazon.hive<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>libthrift<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>system<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">systemPath</span>&gt;</span>$&#123;project.basedir&#125;/src/main/resources/libs/libthrift-0.9.0.jar<span class="tag">&lt;/<span class="name">systemPath</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.amazon.hive<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>ql<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>system<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">systemPath</span>&gt;</span>$&#123;project.basedir&#125;/src/main/resources/libs/ql.jar<span class="tag">&lt;/<span class="name">systemPath</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.amazon.hive<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>TCLIServiceClient<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>system<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">systemPath</span>&gt;</span>$&#123;project.basedir&#125;/src/main/resources/libs/TCLIServiceClient.jar<span class="tag">&lt;/<span class="name">systemPath</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--END local amazon hive jdbc driver dependencies--&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.httpcomponents<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>httpclient<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.1.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.zookeeper<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>zookeeper<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.4.6<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--&lt;type&gt;pom&lt;/type&gt;--&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Load Driver Class</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> String driverName = <span class="string">"com.amazon.hive.jdbc41.HS2Driver"</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  Class.forName(driverName);</span><br><span class="line">&#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">  <span class="comment">// TODO Auto-generated catch block</span></span><br><span class="line">  e.printStackTrace();</span><br><span class="line">  System.exit(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="连接Hive和测试"><a href="#连接Hive和测试" class="headerlink" title="连接Hive和测试"></a>连接Hive和测试</h3><ol>
+<li><p>创建连接</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Connection con;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** <span class="doctag">TODO:</span> DOCUMENT ME! */</span></span><br><span class="line"><span class="keyword">protected</span> Statement  stmt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">con  = DriverManager.getConnection(JDBC_URL, <span class="string">"hadoop"</span>, <span class="string">""</span>);</span><br><span class="line">stmt = con.createStatement();</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>执行SQL语句:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test1DropTable</span><span class="params">()</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">  stmt.execute(<span class="string">"DROP TABLE IF EXISTS MY_Table"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="DynamoDB和Hive的表的映射"><a href="#DynamoDB和Hive的表的映射" class="headerlink" title="DynamoDB和Hive的表的映射"></a>DynamoDB和Hive的表的映射</h2><h3 id="将-DynamoDB-表导出到-HDFS"><a href="#将-DynamoDB-表导出到-HDFS" class="headerlink" title="将 DynamoDB 表导出到 HDFS"></a>将 DynamoDB 表导出到 HDFS</h3><ol>
+<li><p>通过Hive命令创建Hive外部表, 将DynamoDB的表映射Hive表中.</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">EXTERNAL</span> <span class="keyword">TABLE</span> hiveTableName (col1 <span class="keyword">string</span>, col2 <span class="built_in">bigint</span>, col3 <span class="built_in">array</span>&lt;<span class="keyword">string</span>&gt;)</span><br><span class="line"><span class="keyword">STORED</span> <span class="keyword">BY</span> <span class="string">'org.apache.hadoop.hive.dynamodb.DynamoDBStorageHandler'</span></span><br><span class="line">TBLPROPERTIES (<span class="string">"dynamodb.table.name"</span> = <span class="string">"dynamodbtable1"</span>,</span><br><span class="line"><span class="string">"dynamodb.column.mapping"</span> = <span class="string">"col1:name,col2:year,col3:holidays"</span>);</span><br></pre></td></tr></table></figure>
+<p>==&gt;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">EXTERNAL</span> <span class="keyword">TABLE</span> HiveCity</span><br><span class="line">    (city_id   <span class="built_in">BIGINT</span>,</span><br><span class="line">    city_name  <span class="keyword">STRING</span>,</span><br><span class="line">    post_code <span class="keyword">STRING</span>)</span><br><span class="line"><span class="keyword">STORED</span> <span class="keyword">BY</span> <span class="string">'org.apache.hadoop.hive.dynamodb.DynamoDBStorageHandler'</span></span><br><span class="line">TBLPROPERTIES(</span><br><span class="line">    <span class="string">"dynamodb.table.name"</span> = <span class="string">"KAT-RES-City"</span>, <span class="string">"dynamodb.column.mapping"</span>=<span class="string">"city_id:id,city_name:city,post_code:zip"</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>映射表创建成功后, DynamoDB中的数据会及时同步到HDFS中.</p>
+</li>
+<li><p>查询Hive表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> HiveCity;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Hive表的做统计<br>AWS EMR的<code>select count(*)</code>默认是不工作的(参考 <a href="https://docs.aws.amazon.com/zh_cn/emr/latest/ReleaseGuide/emr-whatsnew-history.html" target="_blank" rel="noopener">Amazon EMR的已知问题</a> ). 统计有以下两种实现方式:</p>
+<ol>
+<li>通过Hive命令<code>ANALYZE TABLE</code>来做( <a href="ANALYZE TABLE">参考</a> ), 比如: <code>ANALYZE TABLE HiveCity COMPUTE STATISTICS</code>.<br>这个命令是执行一个MapReduce的Job来处理数据, 运行了<code>ANALYZE</code>命令后, <code>count(*)</code>才会得到正确的值.<blockquote>
+<p>注意: <code>ANALYZE</code>命令一次有效, 当DynamoDB的数据有增删的话, 再次运行<code>count(*)</code>是不会会得到正确的值(还是上次<code>ANALYZE</code>的结果).</p>
+</blockquote>
+</li>
+<li>通过配置<code>set hive.compute.query.using.stats=false</code><br>Amazon EMR默认将其设置为true. 当关闭<code>hive.compute.query.using.stats</code>时, Hive的每条统计查询语句会转换成一条MapReduce的Job来执行(普通的查询语句不会转换).<br>这样的<code>count(*)</code>每次都会的到最新的结果.</li>
+</ol>
+</li>
+<li><p>多Hive表的俩和查询<br>由于DynamoDB不支持连接查询, 我们将DynamoDB的映射为Hive的多张表, 通过HiveQL的, 我们就可以做到DynamoDB的多表联合查询. 比如这条联合查询语句:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> u.user_name, c.city_name <span class="keyword">from</span> HiveUser u <span class="keyword">join</span> HiveCity c <span class="keyword">on</span> u.city_id = c.city_id</span><br></pre></td></tr></table></figure>
+<p>Hive将其转换成为MapReduce的Job来执行.</p>
+<p>更多的查询语句: <a href="https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/EMRforDynamoDB.Tutorial.QueryDataInDynamoDB.html" target="_blank" rel="noopener">查询 DynamoDB 表中的数据</a></p>
+<h3 id="Hive将数据复制到DynamoDB"><a href="#Hive将数据复制到DynamoDB" class="headerlink" title="Hive将数据复制到DynamoDB"></a>Hive将数据复制到DynamoDB</h3><p>Hive也可以将处理的后的数据在写入到Hive的DynamoDB的映射表, 相当于Hive将数据写入到DynamoDB中, 如下:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> OVERWRITE <span class="keyword">TABLE</span> User_SNAPSHOT</span><br><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> HiveUser <span class="keyword">where</span> city_id = <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h1 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h1><ol>
+<li><p>如果JDBC执行HiveQL产生了MapReduce的Job(比如count(*), select … join …), JDBC连接必须配置用户名密码, 用户名为<code>hadoop</code>, 密码为空.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DriverManager.getConnection(JDBC_URL, <span class="string">"hadoop"</span>, <span class="string">""</span>);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>DynamoDB的吞吐量: Hive同步数据到DynamoDB会消耗DynamoDB的吞吐量. 我们需要根据实际的数据量大小来平衡同步速率和吞吐量 (参考 <a href="https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/EMRforDynamoDB.PerformanceTuning.Throughput.html" target="_blank" rel="noopener">DynamoDB 配置的吞吐量</a> )</p>
+</li>
+<li>数据类型映射问题: DynamoDB和Hive两个的数据类型不是完全匹配的, 不是所有的字段都可以映射到Hive上的( <a href="https://docs.aws.amazon.com/zh_cn/amazondynamodb/latest/developerguide/EMRforDynamoDB.ExternalTableForDDB.html" target="_blank" rel="noopener">参考</a> )</li>
+<li>Hive有的查询语句会转换成为MapReduce的Job, 他不会马上返回结果, 需要等待Job执行完成. 这个过程在5s以上</li>
+<li>在NodeJs里访问Hive的问题: 目前在NodeJS里头访问Hive是可以使用JDBC Driver做到的, 但是它需要JDK运行时, 所以在AWS Lambda - NodeJS上无法实现访问Hive.</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Wang Yang</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/" title="DynamoDB集成EMR">https://blog.imyang.wang/2018/04/08/aws-dynamodb-5-emr/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/DynamoDB/" rel="tag"># DynamoDB</a>
+          
+            <a href="/tags/AWS/" rel="tag"># AWS</a>
+          
+            <a href="/tags/EMR/" rel="tag"># EMR</a>
+          
+            <a href="/tags/Hive/" rel="tag"># Hive</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/03/aws-elasti-cache-lambda/" rel="next" title="Amazon ElastiCache for Redis in Lambda">
+                <i class="fa fa-chevron-left"></i> Amazon ElastiCache for Redis in Lambda
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/04/kafka-my-problem/" rel="prev" title="Kafka使用中遇到的问题">
+                Kafka使用中遇到的问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/apple-touch-icon.png" alt="Wang Yang">
+            
+              <p class="site-author-name" itemprop="name">Wang Yang</p>
+              <p class="site-description motion-element" itemprop="description">java, microservice</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">27</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#配置-DynamoDB"><span class="nav-number">1.</span> <span class="nav-text">配置 DynamoDB</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#权限配置"><span class="nav-number">1.1.</span> <span class="nav-text">权限配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置AWS-Token"><span class="nav-number">1.2.</span> <span class="nav-text">配置AWS Token</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#建模"><span class="nav-number">1.3.</span> <span class="nav-text">建模</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建表病导入数据"><span class="nav-number">1.4.</span> <span class="nav-text">创建表病导入数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在-DynamoDB-Console-检查数据"><span class="nav-number">1.5.</span> <span class="nav-text">在 DynamoDB Console 检查数据</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Amazon-EMR"><span class="nav-number">2.</span> <span class="nav-text">Amazon EMR</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#启动Hive集群"><span class="nav-number">2.1.</span> <span class="nav-text">启动Hive集群</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#准备密钥对-可选"><span class="nav-number">2.1.1.</span> <span class="nav-text">准备密钥对 (可选)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进入-Amazon-EMR-Console-创建Hadoop集群"><span class="nav-number">2.1.2.</span> <span class="nav-text">进入 Amazon EMR Console, 创建Hadoop集群</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置并启动Hadoop集群"><span class="nav-number">2.1.3.</span> <span class="nav-text">配置并启动Hadoop集群</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看Hadoop集群详情"><span class="nav-number">2.1.4.</span> <span class="nav-text">查看Hadoop集群详情</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#访问集成集群-可选"><span class="nav-number">2.1.5.</span> <span class="nav-text">访问集成集群 (可选)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DynamoDB集成Hive"><span class="nav-number">3.</span> <span class="nav-text">DynamoDB集成Hive</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#本地开发环境搭建"><span class="nav-number">3.1.</span> <span class="nav-text">本地开发环境搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置SSH-隧道"><span class="nav-number">3.1.1.</span> <span class="nav-text">配置SSH 隧道</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试SSH-隧道"><span class="nav-number">3.1.2.</span> <span class="nav-text">测试SSH 隧道</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java程序通过JDBC连接Hive"><span class="nav-number">3.2.</span> <span class="nav-text">Java程序通过JDBC连接Hive</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#下载Amazon-Hive-Jdbc-Driver"><span class="nav-number">3.2.1.</span> <span class="nav-text">下载Amazon Hive Jdbc Driver</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#加载Amazon-Hive-Jdbc-Driver"><span class="nav-number">3.2.2.</span> <span class="nav-text">加载Amazon Hive Jdbc Driver</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#连接Hive和测试"><span class="nav-number">3.2.3.</span> <span class="nav-text">连接Hive和测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DynamoDB和Hive的表的映射"><span class="nav-number">3.3.</span> <span class="nav-text">DynamoDB和Hive的表的映射</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#将-DynamoDB-表导出到-HDFS"><span class="nav-number">3.3.1.</span> <span class="nav-text">将 DynamoDB 表导出到 HDFS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive将数据复制到DynamoDB"><span class="nav-number">3.3.2.</span> <span class="nav-text">Hive将数据复制到DynamoDB</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#注意事项"><span class="nav-number">4.</span> <span class="nav-text">注意事项</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2011 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wang Yang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=7.0.1"></script>
+
+
+  
+  
+
+
+  
+    <!-- LOCAL: You can save these files to your site and update links -->
+
+  
+  <script src="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/gitmint.browser.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/default.css">
+<!-- END LOCAL -->
+
+<style>
+#gitment-container a {
+  border-bottom: none;
+}
+
+</style>
+
+<script>
+  function renderGitment() {
+    var gitment = new Gitmint({
+      id: window.location.pathname,
+      owner: 'wangyfm',
+      repo: 'blog-gitment-comments',
+      
+        lang: 'zh-CN' || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+      
+      oauth: {
+      
+      
+        client_secret: 'c49270c62fdfbbb2d675670a601e5ef21b48e5a2',
+      
+        client_id: 'e53f9d3287adfa20f49e'
+      }
+    });
+    gitment.render('gitment-container');
+  }
+
+  
+    renderGitment();
+  
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=7.0.1"></script>
+  <script src="/js/src/scroll-cookie.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      
+        background-color: #eee;
+        background-image: linear-gradient(#fcfcfc, #eee);
+        border: 1px solid #d5d5d5;
+        border-radius: 3px;
+      
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      
+        right: 4px;
+        top: 8px;
+      
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1;
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function(i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap');
+      $(e).after($wrap);
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function(e) {
+        var code = $(this).parent().find('.code').find('.line').map(function(i, e) {
+          return $(e).text();
+        }).toArray().join('\n');
+        var ta = document.createElement('textarea');
+        var yPosition = window.pageYOffset || document.documentElement.scrollTop;
+        ta.style.top = yPosition + 'px'; // Prevent page scroll
+        ta.style.position = 'absolute';
+        ta.style.opacity = '0';
+        ta.readOnly = true;
+        ta.value = code;
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, code.length);
+        ta.readOnly = false;
+        var result = document.execCommand('copy');
+        
+          if (result) $(this).text('复制成功');
+          else $(this).text('复制失败');
+        
+        ta.blur(); // For iOS
+        $(this).blur();
+      })).on('mouseleave', function(e) {
+        var $b = $(this).find('.copy-btn');
+        setTimeout(function() {
+          $b.text('复制');
+        }, 300);
+      }).append(e);
+    })
+  </script>
+
+
+</body>
+</html>
